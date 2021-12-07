@@ -66,11 +66,11 @@ class Workspace():
         
         states, actions, rewards, dones, next_states = batch
 
-        states_v = torch.tensor(states).to(device)
-        next_states_v = torch.tensor(next_states).to(device)
-        actions_v = torch.tensor(actions).to(device)
-        rewards_v = torch.tensor(rewards).to(device)
-        done_mask = torch.ByteTensor(dones).to(device)
+        states_v = torch.tensor(states).to(self.device)
+        next_states_v = torch.tensor(next_states).to(self.device)
+        actions_v = torch.tensor(actions).to(self.device)
+        rewards_v = torch.tensor(rewards).to(self.device)
+        done_mask = torch.ByteTensor(dones).to(self.device)
 
         state_action_values = net[agent_index](states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
         next_state_values = target_nets[agent_index](next_states_v).max(1)[0]
@@ -91,8 +91,8 @@ class Workspace():
 
     def train(self):
         for index in range(self.num_of_agents):
-            self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(device))
-            self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(device))
+            self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
+            self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
             self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n))
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
