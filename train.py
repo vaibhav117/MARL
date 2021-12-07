@@ -39,7 +39,8 @@ class Workspace():
         self.eps_start = constants.eps_start
         self.sync_target_network_freq = constants.sync_target_network_freq
         self.batch_size = constants.batch_size
-        self.network_update_freq = constants.network_update_freq
+        self.network_update_freq_episode_wise = constants.network_update_freq_episode_wise
+        self.episode_count = 0
 
         self.optimizers = []
         self.agents = []
@@ -112,8 +113,9 @@ class Workspace():
             if reward is not None:
                 self.rewards.append(reward)
                 self.evaluate(index)
+                self.episode_count += 1
 
-            if (self.replay_buffers[index].__len__() >= self.replay_start_size) and (self.timesteps % self.network_update_freq):
+            if (self.replay_buffers[index].__len__() >= self.replay_start_size) and (self.episode_count % self.network_update_freq_episode_wise):
                  self.network_update(index)
 
             if self.timesteps >= self.total_timesteps:
