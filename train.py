@@ -64,7 +64,7 @@ class Workspace():
 
     def network_update(self,agent_index):
         print(f"----- Performing network update -----")
-        batch = replay_buffers[agent_index].sample(batch_size)
+        batch = self.replay_buffers[agent_index].sample(batch_size)
         
         states, actions, rewards, dones, next_states = batch
 
