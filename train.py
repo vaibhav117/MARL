@@ -84,12 +84,12 @@ class Workspace():
         loss_t = nn.MSELoss()(state_action_values, expected_state_action_values)
         wandb.log({"loss":loss_t})
 
-        optimizers[agent_index].zero_grad()
+        self.optimizers[agent_index].zero_grad()
         loss_t.backward()
-        optimizers[agent_index].step()
+        self.optimizers[agent_index].step()
 
         if self.timesteps % self.sync_target_network_freq == 0:
-            target_nets[agent_index].load_state_dict(nets[agent_index].state_dict())
+            self.target_nets[agent_index].load_state_dict(self.nets[agent_index].state_dict())
 
         self.epsilons[index] = max(self.epsilons[index]*self.eps_decay, self.eps_min)
 
