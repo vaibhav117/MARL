@@ -54,6 +54,7 @@ class Workspace():
 
     def evaluate(self,agent_index):
         mean_reward = np.mean(self.rewards[-100*self.num_of_agents:])
+        wandb.log({"mean_reward":mean_reward})
         print(f"{self.timesteps}=> episodes:{len(self.rewards)} , mean_reward:{mean_reward} , epsilon:{self.epsilons[agent_index]}")
         if self.best_mean_reward is None or self.best_mean_reward < mean_reward:
             torch.save(self.nets[agent_index].state_dict(), "best-model.dat")
@@ -79,6 +80,7 @@ class Workspace():
         expected_state_action_values = next_state_values * self.discount + rewards_v
 
         loss_t = nn.MSELoss()(state_action_values, expected_state_action_values)
+        wandb.log({"loss":loss_t})
 
         optimizers[agent_index].zero_grad()
         loss_t.backward()
