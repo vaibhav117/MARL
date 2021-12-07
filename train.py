@@ -4,6 +4,7 @@ import torch.optim as optim
 
 import numpy as np
 import time
+import wandb
 
 from env import make_env
 from arguments import parse_args
@@ -36,6 +37,7 @@ class Workspace():
         self.eps_min = constants.eps_min
         self.eps_start = constants.eps_start
         self.sync_target_network_freq = constants.sync_target_network_freq
+        self.batch_size = constants.batch_size
 
         self.optimizers = []
         self.agents = []
@@ -115,6 +117,7 @@ class Workspace():
 
 if __name__ == '__main__':
     workspace = Workspace()
+    wandb.init(project=f"{constants.project_name}", name=f"{constants.experiment_name}_archers={constants.num_archers}_knights={constants.num_knights}_lr={constants.lr}_batch-size={constants.batch_size}")
     workspace.train()
     if constants.run_training_flag:
         pass
