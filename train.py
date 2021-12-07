@@ -111,7 +111,7 @@ class Workspace():
                 self.rewards.append(reward)
                 self.evaluate(index)
 
-            if self.replay_buffers[index].__len__ > self.replay_start_size:
+            if self.replay_buffers[index].__len__() > self.replay_start_size:
                  self.network_update(index)
 
             if self.timesteps >= self.total_timesteps:
