@@ -74,7 +74,7 @@ class Workspace():
         rewards_v = torch.tensor(rewards).to(self.device)
         done_mask = torch.ByteTensor(dones).to(self.device)
 
-        state_action_values = net[agent_index](states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
+        state_action_values = self.nets[agent_index](states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
         next_state_values = target_nets[agent_index](next_states_v).max(1)[0]
         next_state_values[done_mask] = 0.0
         next_state_values = next_state_values.detach()
