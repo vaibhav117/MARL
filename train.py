@@ -63,6 +63,7 @@ class Workspace():
                 print("Best mean reward updated %.3f" % (self.best_mean_reward))
 
     def network_update(self,agent_index):
+        print(f"----- Performing network update -----")
         batch = replay_buffers[agent_index].sample(batch_size)
         
         states, actions, rewards, dones, next_states = batch
@@ -89,6 +90,7 @@ class Workspace():
         if self.timesteps % self.sync_target_network_freq == 0:
             target_nets[agent_index].load_state_dict(nets[agent_index].state_dict())
 
+        self.epsilons[index] = max(self.epsilons[index]*self.eps_decay, self.eps_min)
 
 
     def train(self):
@@ -104,13 +106,12 @@ class Workspace():
         for index_lin , agent in enumerate(self.env.agent_iter()):
             self.timesteps += 1
             index = index_lin%self.num_of_agents
-            self.epsilons[index] = max(self.epsilons[index]*self.eps_decay, self.eps_min)
             reward = self.agents[index].play_step(self.nets[index], self.epsilons[index], device=self.device)
             if reward is not None:
                 self.rewards.append(reward)
                 self.evaluate(index)
 
-            if len(self.replay_buffers[index]) > self.replay_start_size:
+            if self.replay_buffers[index].__len__ > self.replay_start_size:
                  self.network_update(index)
 
             if self.timesteps >= self.total_timesteps:
