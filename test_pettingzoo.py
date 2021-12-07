@@ -8,7 +8,7 @@ import supersuit as ss
 import matplotlib.pyplot as plt
 
 
-env = knights_archers_zombies_v7.env(num_knights=0 , num_archers=2)
+env = knights_archers_zombies_v7.env(num_knights=0 , num_archers=1)
 env = ss.color_reduction_v0(env, mode='B')
 env = ss.resize_v0(env, x_size=84, y_size=84)
 env = ss.frame_stack_v1(env, 3)
@@ -23,18 +23,19 @@ def random_steps(iterations):
     for agent in env.agent_iter():
         print(f"Agent:{agent}")
         obs, reward, done, info = env.last()
-        print(done)
+        print(done,reward,info)
         if not done:
             if agent == "archer_0":
                 action = 0
             else:
-                action = 1
+                action = 0  
         else:
             action = None
         env.step(action)
-        plt.imshow(obs)
-        plt.show()
-        # env.render(mode='human')
+        # plt.imshow(obs)
+        # plt.show()
+        env.render(mode='human')
+        time.sleep(1)
 
 
 random_steps(10000)

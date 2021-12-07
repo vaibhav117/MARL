@@ -1,41 +1,117 @@
 from rl_modules.dqn.dqn import DQN
 import torch
+import torch.optim as optim
 
 import numpy as np
 import time
 
 from env import make_env
 from arguments import parse_args
-
-from stable_baselines3.dqn import CnnPolicy
-# from stable_baselines3 import DQN
+from rl_modules.dqn.agent import Agent
+from rl_modules.dqn.replay_buffer import ReplayBuffer
 
 constants = parse_args()
 
 class Workspace():
     def __init__(self):
         self.device = torch.device(constants.device)
-        self.env = make_env(num_knights=0,num_archers=1)
-        self.eval_env = make_env(num_knights=0,num_archers=1)
+        self.env = make_env(num_knights=constants.num_knights,num_archers=constants.num_archers,killable_knights=constants.killable_knights,killable_archers=constants.killable_archers,line_death=constants.line_death)
+        self.eval_env = make_env(num_knights=constants.num_knights,num_archers=constants.num_archers,killable_knights=constants.killable_knights,killable_archers=constants.killable_archers,line_death=constants.line_death)
         self.env.reset()
         self.eval_env.reset()
         self.agent_list = self.env.agents
-        self.num_of_agent = constants.num_knights + constants.num_archers
-        # self.replay_buffer = ReplayBuffer(self.env.observation_space.shape,
-        #                                     cfg.replay_buffer_capacity,
-        #                                     self.device)
+        self.num_of_agents = constants.num_knights + constants.num_archers
         self.action_space = self.env.action_space(self.agent_list[0])
         self.observation_space = self.env.observation_space(self.agent_list[0])
+        self.total_timesteps = constants.total_timesteps
+        self.timesteps = 0
+        self.best_mean_reward = 0
+        self.agent_list = self.env.agents
+        
+        self.replay_buffer_size = constants.replay_buffer_size
+        self.lr = constants.lr
+        self.replay_start_size = constants.replay_start_size
+        self.eps_decay = constants.eps_decay
+        self.discount = constants.discount
+        self.eps_min = constants.eps_min
+        self.eps_start = constants.eps_start
+        self.sync_target_network_freq = constants.sync_target_network_freq
+
+        self.optimizers = []
+        self.agents = []
+        self.replay_buffers = []
+        self.nets = []
+        self.target_nets = []
+        self.epsilons = []
+        self.rewards = []
+        
 
     def test(self):
         print(f"Action Space: {self.action_space}")
         print(f"Observation Space: {self.observation_space}")
 
+    def evaluate(self,agent_index):
+        mean_reward = np.mean(self.rewards[-100*self.num_of_agents:])
+        print(f"{self.timesteps}=> episodes:{len(self.rewards)} , mean_reward:{mean_reward} , epsilon:{self.epsilons[agent_index]}")
+        if self.best_mean_reward is None or self.best_mean_reward < mean_reward:
+            torch.save(self.nets[agent_index].state_dict(), "best-model.dat")
+            self.best_mean_reward = mean_reward
+            if self.best_mean_reward is not None:
+                print("Best mean reward updated %.3f" % (self.best_mean_reward))
+
+    def network_update(self,agent_index):
+        batch = replay_buffers[agent_index].sample(batch_size)
+        
+        states, actions, rewards, dones, next_states = batch
+
+        states_v = torch.tensor(states).to(device)
+        next_states_v = torch.tensor(next_states).to(device)
+        actions_v = torch.tensor(actions).to(device)
+        rewards_v = torch.tensor(rewards).to(device)
+        done_mask = torch.ByteTensor(dones).to(device)
+
+        state_action_values = net[agent_index](states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
+        next_state_values = target_nets[agent_index](next_states_v).max(1)[0]
+        next_state_values[done_mask] = 0.0
+        next_state_values = next_state_values.detach()
+        expected_state_action_values = next_state_values * self.discount + rewards_v
+
+        loss_t = nn.MSELoss()(state_action_values, expected_state_action_values)
+
+        optimizers[agent_index].zero_grad()
+        loss_t.backward()
+        optimizers[agent_index].step()
+
+        if self.timesteps % self.sync_target_network_freq == 0:
+            target_nets[agent_index].load_state_dict(nets[agent_index].state_dict())
+
+
+
     def train(self):
-        dqn = DQN(self.observation_space.shape,self.action_space.shape)
+        for index in range(self.num_of_agents):
+            self.nets.append(DQN(self.observation_space.shape,self.action_space.n))
+            self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n))
+            self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
+            self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n))
+            self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
+            self.epsilons.append(self.eps_start)
+        
 
+        for index_lin , agent in enumerate(self.env.agent_iter()):
+            self.timesteps += 1
+            index = index_lin%self.num_of_agents
+            self.epsilons[index] = max(self.epsilons[index]*self.eps_decay, self.eps_min)
+            reward = self.agents[index].play_step(self.nets[index], self.epsilons[index], device=self.device)
+            if reward is not None:
+                self.rewards.append(reward)
+                self.evaluate(index)
 
-                        
+            if len(self.replay_buffers[index]) > self.replay_start_size:
+                 self.network_update(index)
+
+            if self.timesteps >= self.total_timesteps:
+                break
+
 
 if __name__ == '__main__':
     workspace = Workspace()

@@ -9,9 +9,8 @@ device = torch.device("cuda")
 class DQN(nn.Module):
     def __init__(self, input_shape, n_actions):
         super(DQN, self).__init__()
-
         self.conv = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=8, stride=4),
+            nn.Conv2d(input_shape[2], 32, kernel_size=8, stride=4),
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
@@ -23,13 +22,19 @@ class DQN(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(conv_out_size, 512),
             nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 512),
+            nn.ReLU(),
             nn.Linear(512, n_actions)
         )
 
     def _get_conv_out(self, shape):
-        o = self.conv(torch.zeros(1, *shape))
+        torch_shape = (shape[2] , shape[0] , shape[1])
+        o = self.conv(torch.zeros(1, *torch_shape))
         return int(np.prod(o.size()))
 
     def forward(self, x):
-        conv_out = self.conv(x).view(x.size()[0], -1)
+        x = x.permute(0,3,1,2)
+        conv_out = self.conv(x)
         return self.fc(conv_out)
