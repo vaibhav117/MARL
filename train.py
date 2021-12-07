@@ -91,8 +91,8 @@ class Workspace():
 
     def train(self):
         for index in range(self.num_of_agents):
-            self.nets.append(DQN(self.observation_space.shape,self.action_space.n))
-            self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n))
+            self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(device))
+            self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(device))
             self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
             self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n))
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))

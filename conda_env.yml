@@ -3,9 +3,9 @@ channels:
   - defaults
 dependencies:
   - python=3.7
-  - pytorch=1.8.1
   - tensorflow=1.14
   - cudatoolkit=11.0
+  - pytorch=1.8.1
   - absl-py
   - pyparsing
   - jupyterlab
