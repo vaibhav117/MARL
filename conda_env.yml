@@ -4,6 +4,7 @@ channels:
 dependencies:
   - python=3.7
   - tensorflow=1.14
+  - torchvision-0.11.1
   - cudatoolkit=11.0
   - pytorch=1.8.1
   - absl-py
