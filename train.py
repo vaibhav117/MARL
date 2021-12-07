@@ -39,6 +39,7 @@ class Workspace():
         self.eps_start = constants.eps_start
         self.sync_target_network_freq = constants.sync_target_network_freq
         self.batch_size = constants.batch_size
+        self.network_update_freq = constants.network_update_freq
 
         self.optimizers = []
         self.agents = []
@@ -112,7 +113,7 @@ class Workspace():
                 self.rewards.append(reward)
                 self.evaluate(index)
 
-            if self.replay_buffers[index].__len__() >= self.replay_start_size:
+            if (self.replay_buffers[index].__len__() >= self.replay_start_size) and (self.timesteps % self.network_update_freq):
                  self.network_update(index)
 
             if self.timesteps >= self.total_timesteps:
