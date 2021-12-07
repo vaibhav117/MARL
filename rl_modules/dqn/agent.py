@@ -13,7 +13,8 @@ class Agent:
         self.action_range = action_range-1
 
     def _reset(self):
-        self.state = self.env.reset()
+        self.env.reset()
+        self.state , _ , _ , _ = self.env.last()
         self.total_reward = 0.0
 
     def play_step(self, net, epsilon=0.0, device="cpu"):
