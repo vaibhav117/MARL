@@ -91,7 +91,7 @@ class Workspace():
         if self.timesteps % self.sync_target_network_freq == 0:
             self.target_nets[agent_index].load_state_dict(self.nets[agent_index].state_dict())
 
-        self.epsilons[index] = max(self.epsilons[index]*self.eps_decay, self.eps_min)
+        self.epsilons[agent_index] = max(self.epsilons[agent_index]*self.eps_decay, self.eps_min)
 
 
     def train(self):
