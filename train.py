@@ -36,6 +36,7 @@ class Workspace():
         self.best_mean_reward = 0
         self.episode_reward = 0
         self.episode_count = 0
+        self.reward_multiplier = constants.reward_multiplier
         self.agent_list = self.env.agents
         
         self.replay_buffer_size = constants.replay_buffer_size
@@ -82,8 +83,8 @@ class Workspace():
             if self.best_mean_reward is not None:
                 print("Best mean reward updated %.3f" % (self.best_mean_reward))
 
-    def network_update(self,agent_index):
-        # print(f"----- Performing network update -----")
+    def network_update(self, agent_index):
+        print(f"----- Performing network update -----")
         batch = self.replay_buffers[agent_index].sample(self.batch_size)
         
         states, actions, rewards, dones, next_states = batch
@@ -113,36 +114,41 @@ class Workspace():
         self.epsilons[agent_index] = max(self.epsilons[agent_index]*self.eps_decay, self.eps_min)
 
     
-    def add_to_replay_buffer(agent_index, curr_state, action, reward, id_done, new_state):
-        exp = Experience(curr_state, action, reward, is_done, new_state)
-        self.exp_buffer.append(exp)
+    def add_to_replay_buffer(self, agent_index, curr_state, action, reward, is_done, new_state):
+        exp = self.Experience(curr_state, action, reward, is_done, new_state)
+        self.replay_buffers[agent_index].append(exp)
 
     def train(self):
         for index in range(self.num_of_agents):
             self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
-            self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n))
+            self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n, self.device))
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
             self.epsilons.append(self.eps_start)
         
+        curr_state, _, _, _ = self.env.last()
 
         for index_lin , agent in enumerate(self.env.agent_iter()):
             agent_index = index_lin%self.num_of_agents
 
             if agent_index == 0:
                 self.timesteps += 1
-                   
-            curr_state, _, _, _ = self.env.last()
-            action = self.agents[agent_index].take_step(agent_index, curr_state, epsilons, explore_on=True)
+                
+            action = self.agents[agent_index].take_step(agent_index, self.nets[agent_index], curr_state, self.epsilons, explore_on=True)
             new_state, reward, is_done, info = self.env.last()
-            add_to_replay_buffer(agent_index, curr_state, action, reward, id_done, new_state)
+            reward = reward*self.reward_multiplier
+            self.episode_reward += reward
+            self.add_to_replay_buffer(agent_index, curr_state, action, reward, is_done, new_state)
+            curr_state = new_state
 
             if is_done:
                 self.rewards.append(self.episode_reward)
                 self.episode_reward = 0
                 self.evaluate(agent_index)
                 self.episode_count += 1
+                self.env.reset()
+                curr_state, _, _, _ = self.env.last()
 
             if (self.replay_buffers[agent_index].__len__() >= self.replay_start_size) and (self.timesteps % self.network_update_freq == 0):
                  self.network_update(agent_index)

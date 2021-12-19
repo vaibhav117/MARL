@@ -33,14 +33,18 @@ def random_steps(iterations):
         else:
             action = None
             
-        plt.imshow(obs)
-        plt.show()
+        # plt.imshow(obs)
+        # plt.show()
 
         env.step(action)
-        obs, reward, done, info = env.last()
+        obs1, reward1, done1, info1 = env.last()
+        obs2, reward2, done2, info2 = env.last()
 
-        plt.imshow(obs)
-        plt.show()
+        if(obs1.all() != obs2.all()):
+            print("env.last() moves time")
+
+        # plt.imshow(obs)
+        # plt.show()
         env.render(mode='human')
         # time.sleep(0.5)
 
