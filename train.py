@@ -14,7 +14,7 @@ from datetime import datetime
 from env import make_env
 from arguments import parse_args
 from rl_modules.dqn.agent import Agent
-from rl_modules.dqn.replay_buffer import ReplayBuffer
+from rl_modules.prioritised_replay_buffer import PrioritizedReplayBuffer
 
 constants = parse_args()
 
@@ -50,6 +50,8 @@ class Workspace():
         self.batch_size = constants.batch_size
         self.network_update_freq = constants.network_update_freq
         self.loss_function = nn.SmoothL1Loss()
+        self.priority_rb_alpha = constants.priority_rb_alpha
+        self.priority_rb_beta = constants.priority_rb_beta
         self.Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
 
         self.optimizers = []
@@ -89,7 +91,7 @@ class Workspace():
                 print("Best mean reward updated %.3f" % (self.best_mean_reward))
 
     def network_update(self, agent_index):
-        batch = self.replay_buffers[agent_index].sample(self.batch_size)
+        batch = self.replay_buffers[agent_index].sample_batch(self.priority_rb_beta)
         
         states, actions, rewards, dones, next_states = batch
 
@@ -121,14 +123,14 @@ class Workspace():
 
     
     def add_to_replay_buffer(self, agent_index, curr_state, action, reward, is_done, new_state):
-        exp = self.Experience(curr_state, action, reward, is_done, new_state)
-        self.replay_buffers[agent_index].append(exp)
+        exp = [curr_state, action, reward, new_state, is_done]
+        self.replay_buffers[agent_index].store(*exp)
 
     def train(self):
         for index in range(self.num_of_agents):
             self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
-            self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
+            self.replay_buffers.append(PrioritizedReplayBuffer( self.observation_space.shape, self.replay_buffer_size, self.batch_size, self.priority_rb_alpha ))
             self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n, self.device))
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
             self.epsilons.append(self.eps_start)
