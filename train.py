@@ -102,7 +102,8 @@ class Workspace():
         expected_state_action_values = rewards_v + self.discount*next_state_values
 
         loss_t = self.loss_function(state_action_values, expected_state_action_values)
-        wandb.log({"loss":loss_t})
+        wandb.log({f"loss_{agent_index}":loss_t})
+        wandb.log({f"epsilon_{agent_index}":self.epsilons[agent_index]})
 
         self.optimizers[agent_index].zero_grad()
         loss_t.backward()
