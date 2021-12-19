@@ -29,7 +29,7 @@ def parse_args(s=None):
     parser.add_argument('--lr', default=1e-3, type=float)
     parser.add_argument('--batch_size', default=256, type=int)
     parser.add_argument('--eps_start', default=1., type=float)
-    parser.add_argument('--eps_decay', default=.995, type=float)
+    parser.add_argument('--eps_decay', default=.0001, type=float)
     parser.add_argument('--eps_min', default=0.1, type=float)
     parser.add_argument('--sync_target_network_freq', default=1000, type=int)
     parser.add_argument('--network_update_freq', default=10, type=int)
