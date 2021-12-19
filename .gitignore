@@ -133,3 +133,6 @@ wandb/
 
 # experiments
 experiments/
+
+# log
+log/
