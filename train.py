@@ -159,7 +159,7 @@ class Workspace():
 
 if __name__ == '__main__':
     workspace = Workspace()
-    wandb.init(project=f"{constants.project_name}", name=f"{constants.experiment_name}-{workspace.run_id}_archers={constants.num_archers}_knights={constants.num_knights}_lr={constants.lr}_batch-size={constants.batch_size}_network-update-freq={constants.network_update_freq}_sync-target-network-freq={constants.sync_target_network_freq}_reward-multiplier={constants.reward_multiplier}")
+    wandb.init(project=f"{constants.project_name}", name=f"{constants.experiment_name}-{workspace.run_id}_archers={constants.num_archers}_knights={constants.num_knights}_lr={constants.lr}_batch-size={constants.batch_size}_network-update-freq={constants.network_update_freq}_sync-target-network-freq={constants.sync_target_network_freq}_reward-multiplier={constants.reward_multiplier}_eps_decay={constants.eps_decay}")
     
     if constants.run_training_flag:
         workspace.train()
