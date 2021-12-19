@@ -13,5 +13,5 @@
 #SBATCH --error=./log/KAZ_single_agent/%j_%x_%N.err
 #SBATCH --export=ALL
 
-srun --mpi=pmi2 -n 1 bash /scratch/$USER/run_singularity_scripts/run_singularity_mpi_torch_2.sh \
+srun --mpi=pmi2 -n 1 bash /scratch/$USER/run_singularity_scripts/run_singularity_mpi_torch_MARL.sh \
      /scratch/$USER/projects/Deep_Learning/MARL/config_script.sh
