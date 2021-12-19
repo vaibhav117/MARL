@@ -104,6 +104,7 @@ class Workspace():
         loss_t = self.loss_function(state_action_values, expected_state_action_values)
         wandb.log({f"loss_{agent_index}":loss_t})
         wandb.log({f"epsilon_{agent_index}":self.epsilons[agent_index]})
+        wandb.log({f"episode_count":self.episode_count})
 
         self.optimizers[agent_index].zero_grad()
         loss_t.backward()
