@@ -22,7 +22,7 @@ def parse_args(s=None):
     parser.add_argument('--killable_archers', default=False, type=bool)
     parser.add_argument('--line_death', default=False, type=bool)
 
-    parser.add_argument('--total_timesteps', default=2000000, type=int)
+    parser.add_argument('--total_timesteps', default=1000000000, type=int)
     parser.add_argument('--replay_buffer_size', default=10000000, type=int)
     parser.add_argument('--replay_start_size', default=10000, type=int)
     parser.add_argument('--discount', default=0.99, type=float)
