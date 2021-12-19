@@ -75,7 +75,12 @@ class Workspace():
         wandb.log({"mean_reward":mean_reward})
         print(f"{self.timesteps}=> episodes:{len(self.rewards)} , mean_reward:{mean_reward} , epsilon:{self.epsilons[agent_index]}")
         
-        torch.save(self.nets[agent_index].state_dict(), f"{self.experiment_dir}/latest-model.dat")
+        model_weights = []
+
+        for index in range(self.num_of_agents):
+            model_weights.append(self.nets[index].state_dict())
+
+        torch.save(model_weights, f"{self.experiment_dir}/latest-model.dat")
 
         if self.best_mean_reward is None or self.best_mean_reward < mean_reward:
             torch.save(self.nets[agent_index].state_dict(), f"{self.experiment_dir}/best-model.dat")
