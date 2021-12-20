@@ -52,6 +52,7 @@ class Workspace():
         self.loss_function = nn.SmoothL1Loss()
         self.priority_rb_alpha = constants.priority_rb_alpha
         self.priority_rb_beta = constants.priority_rb_beta
+        self.priority_rb_prior = constants.priority_rb_prior
         self.Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
 
         self.optimizers = []
@@ -93,8 +94,19 @@ class Workspace():
     def network_update(self, agent_index):
         batch = self.replay_buffers[agent_index].sample_batch(self.priority_rb_beta)
         
-        states, actions, rewards, dones, next_states = batch
+        # states, next_states, actions, rewards, dones,  = batch
+        states = batch['obs']
+        next_states = batch['next_obs']
+        actions = batch['acts']
+        rewards = batch['rews']
+        dones = batch['done']
+        weights = batch['weights']
+        indices = batch['indices']
 
+        weights = torch.FloatTensor( batch["weights"].reshape(-1, 1)).to(self.device)
+        indices = batch["indices"]
+
+        weights_v = torch.tensor(weights).to(self.device)
         states_v = torch.tensor(states).to(self.device)
         next_states_v = torch.tensor(next_states).to(self.device)
         actions_v = torch.tensor(actions).to(self.device)
@@ -107,7 +119,11 @@ class Workspace():
         next_state_values = next_state_values.detach()
         expected_state_action_values = rewards_v + self.discount*next_state_values
 
-        loss_t = self.loss_function(state_action_values, expected_state_action_values)
+        loss_t_per_element = self.loss_function(state_action_values, expected_state_action_values, reduction="none")
+        loss = torch.mean(loss_t_per_element * weights_v)
+        loss_for_prior = loss_t_per_element.detach().cpu().numpy()
+        new_priorities = loss_for_prior + self.priority_rb_prior
+
         wandb.log({f"loss_{agent_index}":loss_t})
         wandb.log({f"epsilon_{agent_index}":self.epsilons[agent_index]})
         wandb.log({f"episode_count":self.episode_count})
@@ -120,7 +136,7 @@ class Workspace():
             self.target_nets[agent_index].load_state_dict(self.nets[agent_index].state_dict())
 
         self.epsilons[agent_index] = max(self.epsilons[agent_index] - self.epsilons[agent_index]*self.eps_decay, self.eps_min)
-
+        self.replay_buffers[agent_index].update_priorities(indices, new_priorities)
     
     def add_to_replay_buffer(self, agent_index, curr_state, action, reward, is_done, new_state):
         exp = [curr_state, action, reward, new_state, is_done]

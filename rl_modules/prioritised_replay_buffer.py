@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple
 from segment_tree import MinSegmentTree, SumSegmentTree
 import numpy as np
+import random
 
 class ReplayBuffer:
     """A simple numpy replay buffer."""
