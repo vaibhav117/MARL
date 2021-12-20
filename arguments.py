@@ -29,12 +29,12 @@ def parse_args(s=None):
     parser.add_argument('--replay_start_size', default=1000, type=int)
     parser.add_argument('--discount', default=0.99, type=float)
     parser.add_argument('--lr', default=1e-3, type=float)
-    parser.add_argument('--batch_size', default=2, type=int)
+    parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--eps_start', default=1., type=float)
     parser.add_argument('--eps_decay', default=.0001, type=float)
     parser.add_argument('--eps_min', default=0.15, type=float)
-    parser.add_argument('--sync_target_network_freq', default=500, type=int)
-    parser.add_argument('--network_update_freq', default=1, type=int)
+    parser.add_argument('--sync_target_network_freq', default=1000, type=int)
+    parser.add_argument('--network_update_freq', default=10, type=int)
     parser.add_argument('--reward_multiplier', default=100, type=int)
 
 
