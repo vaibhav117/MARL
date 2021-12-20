@@ -129,7 +129,7 @@ class Workspace():
 
     def get_full_obs(self):
         curr_obs = self.env.state()
-        cv2.resize(curr_obs,(640,360))
+        cv2.resize(curr_obs,(self.full_obs_width,self.full_obs_height))
         return curr_obs
 
     def train(self):
