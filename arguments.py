@@ -34,7 +34,7 @@ def parse_args(s=None):
     parser.add_argument('--eps_decay', default=.0001, type=float)
     parser.add_argument('--eps_min', default=0.15, type=float)
     parser.add_argument('--sync_target_network_freq', default=500, type=int)
-    parser.add_argument('--network_update_freq', default=5, type=int)
+    parser.add_argument('--network_update_freq', default=1, type=int)
     parser.add_argument('--reward_multiplier', default=100, type=int)
 
 
