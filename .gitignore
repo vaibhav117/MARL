@@ -133,6 +133,7 @@ wandb/
 
 # experiments
 experiments/
+trained_models/
 
 # log
 log/
