@@ -8,7 +8,7 @@ import supersuit as ss
 import matplotlib.pyplot as plt
 import random
 
-env = knights_archers_zombies_v7.env(spawn_rate=20, num_knights=1 , num_archers=1, killable_knights=False, killable_archers=False, line_death=False)
+env = knights_archers_zombies_v7.env(spawn_rate=20, num_knights=2 , num_archers=2, killable_knights=False, killable_archers=False, line_death=False)
 # env = ss.color_reduction_v0(env, mode='B')
 env = ss.resize_v0(env, x_size=84, y_size=84)
 # env = ss.frame_stack_v1(env, 3)
@@ -43,8 +43,8 @@ def random_steps(iterations):
         if(obs1.all() != obs2.all()):
             print("env.last() moves time")
 
-        plt.imshow(curr_state)
-        plt.show()
+        # plt.imshow(curr_state)
+        # plt.show()
         env.render(mode='human')
         # time.sleep(0.5)
 

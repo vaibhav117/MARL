@@ -19,7 +19,7 @@ class Workspace():
         self.run_id = constants.run_id
         self.experiment_dir = f"{constants.experiment_dir}/{constants.experiment_name}-{self.run_id}"
         self.device = torch.device(constants.device)
-        self.env = make_env(spawn_rate=constants.spawn_rate, num_knights=constants.num_knights, num_archers=constants.num_archers, killable_knights=constants.killable_knights, killable_archers=constants.killable_archers, line_death=constants.line_death)
+        self.env = make_env(spawn_rate=1, num_knights=constants.num_knights, num_archers=constants.num_archers, killable_knights=constants.killable_knights, killable_archers=constants.killable_archers, line_death=constants.line_death)
         self.eval_env = make_env(spawn_rate=5, num_knights=constants.num_knights, num_archers=constants.num_archers, killable_knights=constants.killable_knights, killable_archers=constants.killable_archers, line_death=constants.line_death)
         self.env.reset()
         self.eval_env.reset()
@@ -60,8 +60,8 @@ class Workspace():
             self.epsilons.append(0)
         
     def load_model(self, model_path):
-        model = torch.load(model_path, map_location=lambda storage, loc: storage)
         for agent_index in range(self.num_of_agents):
+            model = torch.load(model_path, map_location=lambda storage, loc: storage)[agent_index]
             self.nets[agent_index].load_state_dict(model)
             self.nets[agent_index].eval()
 
@@ -82,5 +82,5 @@ if __name__ == '__main__':
     
     workspace = Workspace()
     workspace.init_demo()
-    workspace.load_model("trained_models/single_archer.dat")
+    workspace.load_model("trained_models/archer_2_knight_2.dat")
     workspace.play()

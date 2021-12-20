@@ -9,7 +9,7 @@ import gym
 
 def make_env(spawn_rate=20, num_knights=0, num_archers=1, killable_knights=False, killable_archers=False, line_death=False):
     
-    env = knights_archers_zombies_v7.env(num_knights=num_knights , num_archers=num_archers, killable_knights=killable_knights, killable_archers=killable_archers, line_death=line_death)
+    env = knights_archers_zombies_v7.env(spawn_rate=spawn_rate, num_knights=num_knights , num_archers=num_archers, killable_knights=killable_knights, killable_archers=killable_archers, line_death=line_death)
     
     # env = ss.color_reduction_v0(env, mode='B')                # This reduces color to single channel
     env = ss.resize_v0(env, x_size=84, y_size=84)
