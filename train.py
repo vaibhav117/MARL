@@ -140,13 +140,13 @@ class Workspace():
 
             if agent_index == 0:
                 self.timesteps += 1
-                
+            
+            curr_state, _, _, _ = self.env.last()
             action = self.agents[agent_index].take_step(agent_index, self.nets[agent_index], curr_state, self.epsilons, explore_on=True)
             new_state, reward, is_done, info = self.env.last()
             reward = reward*self.reward_multiplier
             self.episode_reward += reward
             self.add_to_replay_buffer(agent_index, curr_state, action, reward, is_done, new_state)
-            curr_state = new_state
 
             if is_done:
                 self.rewards.append(self.episode_reward)
@@ -154,7 +154,6 @@ class Workspace():
                 self.evaluate(agent_index)
                 self.episode_count += 1
                 self.env.reset()
-                curr_state, _, _, _ = self.env.last()
 
             if (self.replay_buffers[agent_index].__len__() >= self.replay_start_size) and (self.timesteps % self.network_update_freq == 0):
                  self.network_update(agent_index)
