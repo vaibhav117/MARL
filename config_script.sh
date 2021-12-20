@@ -1,1 +1,1 @@
-python train.py --device cuda --project_name Deep_Learning_Project_2_multiagent --experiment_name PriorityRB_Independent_DQNs --num_knights 2 --num_archers 2 --batch_size 512 --lr 0.0001 --network_update_freq 10 --sync_target_network_freq 1000 --eps_decay 0.0001 --spawn_rate 10
+python train.py --device cuda --project_name Deep_Learning_Project_2 --experiment_name PriorityRB_Independent_DQNs --num_knights 1 --num_archers 0 --batch_size 512 --lr 0.0001 --network_update_freq 10 --sync_target_network_freq 1000 --eps_decay 0.0001 --spawn_rate 10
