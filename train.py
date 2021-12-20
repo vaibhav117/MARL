@@ -49,7 +49,7 @@ class Workspace():
         self.sync_target_network_freq = constants.sync_target_network_freq
         self.batch_size = constants.batch_size
         self.network_update_freq = constants.network_update_freq
-        self.loss_function = nn.SmoothL1Loss()
+        self.loss_function = nn.SmoothL1Loss(reduction="none")
         self.priority_rb_alpha = constants.priority_rb_alpha
         self.priority_rb_beta = constants.priority_rb_beta
         self.priority_rb_prior = constants.priority_rb_prior
@@ -113,23 +113,25 @@ class Workspace():
         rewards_v = torch.tensor(rewards).to(self.device)
         done_mask = torch.ByteTensor(dones).to(self.device)
 
+        # import pdb; pdb.set_trace()
+
         state_action_values = self.nets[agent_index](states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
         next_state_values = self.target_nets[agent_index](next_states_v).max(1)[0]
         next_state_values[done_mask] = 0.0
         next_state_values = next_state_values.detach()
         expected_state_action_values = rewards_v + self.discount*next_state_values
 
-        loss_t_per_element = self.loss_function(state_action_values, expected_state_action_values, reduction="none")
+        loss_t_per_element = self.loss_function(state_action_values, expected_state_action_values)
         loss = torch.mean(loss_t_per_element * weights_v)
         loss_for_prior = loss_t_per_element.detach().cpu().numpy()
         new_priorities = loss_for_prior + self.priority_rb_prior
 
-        wandb.log({f"loss_{agent_index}":loss_t})
+        wandb.log({f"loss_{agent_index}":loss})
         wandb.log({f"epsilon_{agent_index}":self.epsilons[agent_index]})
         wandb.log({f"episode_count":self.episode_count})
 
         self.optimizers[agent_index].zero_grad()
-        loss_t.backward()
+        loss.backward()
         self.optimizers[agent_index].step()
 
         if self.timesteps % self.sync_target_network_freq == 0:
