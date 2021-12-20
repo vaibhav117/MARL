@@ -150,7 +150,8 @@ class Workspace():
             
             curr_state = self.get_full_obs()
             action = self.agents[agent_index].take_step(agent_index, self.nets[agent_index], curr_state, self.epsilons, explore_on=True)
-            new_state, reward, is_done, info = self.env.last()
+            _ , reward, is_done, info = self.env.last()
+            new_state = self.get_full_obs()
             reward = reward*self.reward_multiplier
             self.episode_reward += reward
             self.add_to_replay_buffer(agent_index, curr_state, action, reward, is_done, new_state)
