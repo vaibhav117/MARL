@@ -52,33 +52,29 @@ class Workspace():
         self.epsilons = []
         self.rewards = []
 
-        self.model = torch.load(self.experiment_dir, map_location=lambda storage, loc: storage)
-
-
-    def init_demo():
+    def init_demo(self):
         for index in range(self.num_of_agents):
             self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
-            self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
-            self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n))
-            self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
-            self.epsilons.append(self.eps_start)
+            self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n, self.device))
+            self.epsilons.append(0)
         
+    def load_model(self, model_path):
+        model = torch.load(model_path, map_location=lambda storage, loc: storage)
+        for agent_index in range(self.num_of_agents):
+            self.nets[agent_index].load_state_dict(model)
+            self.nets[agent_index].eval()
+
+    def play(self):
         for index_lin , agent in enumerate(self.env.agent_iter()):
-            self.timesteps += 1
-            index = index_lin%self.num_of_agents
-            reward = self.agents[index].play_step(self.nets[index], self.epsilons[index], device=self.device)
-            if reward is not None:
-                self.rewards.append(reward)
-                self.evaluate(index)
-                self.episode_count += 1
+            agent_index = index_lin % self.num_of_agents
+            obs, reward, done, info = self.env.last()
+            action = self.agents[agent_index].take_step(agent_index, self.nets[agent_index], obs, self.epsilons, explore_on=False)
+            
+            # plt.imshow(obs)
+            # plt.show()
 
-            if (self.replay_buffers[index].__len__() >= self.replay_start_size) and (self.timesteps % self.network_update_freq):
-                 self.network_update(index)
-
-            if self.episode_count >= self.demo_len:
-                break
-
+            self.env.render(mode='human')
 
 if __name__ == '__main__':    
     if constants.run_id == None:
@@ -86,3 +82,5 @@ if __name__ == '__main__':
     
     workspace = Workspace()
     workspace.init_demo()
+    workspace.load_model("trained_models/single_archer.dat")
+    workspace.play()

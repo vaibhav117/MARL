@@ -23,6 +23,7 @@ def random_steps(iterations):
     for agent in env.agent_iter():
         print(f"Agent:{agent}")
         obs, reward, done, info = env.last()
+        curr_state = env.state()
         print(done,reward,info)
         if not done:
             if agent == "archer_0":
@@ -42,8 +43,8 @@ def random_steps(iterations):
         if(obs1.all() != obs2.all()):
             print("env.last() moves time")
 
-        # plt.imshow(obs)
-        # plt.show()
+        plt.imshow(curr_state)
+        plt.show()
         env.render(mode='human')
         # time.sleep(0.5)
 
