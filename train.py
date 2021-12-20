@@ -133,8 +133,6 @@ class Workspace():
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
             self.epsilons.append(self.eps_start)
         
-        curr_state, _, _, _ = self.env.last()
-
         for index_lin , agent in enumerate(self.env.agent_iter()):
             agent_index = index_lin%self.num_of_agents
 
@@ -148,7 +146,7 @@ class Workspace():
             self.episode_reward += reward
             self.add_to_replay_buffer(agent_index, curr_state, action, reward, is_done, new_state)
 
-            if is_done:
+            if is_done and agent_index == self.num_of_agents-1 :
                 self.rewards.append(self.episode_reward)
                 self.episode_reward = 0
                 self.evaluate(agent_index)
