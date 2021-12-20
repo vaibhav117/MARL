@@ -135,7 +135,6 @@ class Workspace():
     def train(self):
         for index in range(self.num_of_agents):
             print(self.get_full_obs().shape)
-            break
             self.nets.append(DQN( self.get_full_obs().shape ,self.action_space.n).to(self.device))
             self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
