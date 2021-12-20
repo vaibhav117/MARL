@@ -1,1 +1,1 @@
-python train.py --device cuda --project_name Deep_Learning_Project_2 --experiment_name fullobs_Independent_DQNs --spawn_rate 20 --num_knights 0 --num_archers 1 --batch_size 128 --lr 0.0001 --network_update_freq 5 --sync_target_network_freq 500 --eps_decay 0.001
+python train.py --device cuda --project_name Deep_Learning_Project_2 --experiment_name fullobs_Independent_DQNs --spawn_rate 20 --num_knights 0 --num_archers 1 --batch_size 512 --lr 0.0001 --network_update_freq 5 --sync_target_network_freq 500 --eps_decay 0.001
