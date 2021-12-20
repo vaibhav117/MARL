@@ -6,6 +6,7 @@ import torch.nn as nn
 import numpy as np
 import collections
 import os
+import cv2
 from MakeTreeDir import MAKETREEDIR
 import time
 import wandb
@@ -38,6 +39,8 @@ class Workspace():
         self.episode_count = 0
         self.reward_multiplier = constants.reward_multiplier
         self.agent_list = self.env.agents
+        self.full_obs_width = constants.full_obs_width
+        self.full_obs_height = constants.full_obs_height
         
         self.replay_buffer_size = constants.replay_buffer_size
         self.lr = constants.lr
@@ -93,8 +96,8 @@ class Workspace():
         
         states, actions, rewards, dones, next_states = batch
 
-        states_v = torch.tensor(states).to(self.device)
-        next_states_v = torch.tensor(next_states).to(self.device)
+        states_v = torch.FloatTensor(states).to(self.device)
+        next_states_v = torch.FloatTensor(next_states).to(self.device)
         actions_v = torch.tensor(actions).to(self.device)
         rewards_v = torch.tensor(rewards).to(self.device)
         done_mask = torch.ByteTensor(dones).to(self.device)
@@ -124,24 +127,27 @@ class Workspace():
         exp = self.Experience(curr_state, action, reward, is_done, new_state)
         self.replay_buffers[agent_index].append(exp)
 
+    def get_full_obs(self):
+        curr_obs = self.env.state()
+        cv2.resize(curr_obs,(640,360))
+        return curr_obs
+
     def train(self):
         for index in range(self.num_of_agents):
-            self.nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
+            self.nets.append(DQN( self.get_full_obs().shape ,self.action_space.n).to(self.device))
             self.target_nets.append(DQN(self.observation_space.shape,self.action_space.n).to(self.device))
             self.replay_buffers.append(ReplayBuffer( self.replay_buffer_size ))
             self.agents.append(Agent(self.env, self.replay_buffers[index],self.action_space.n, self.device))
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
             self.epsilons.append(self.eps_start)
         
-        curr_state, _, _, _ = self.env.last()
-
         for index_lin , agent in enumerate(self.env.agent_iter()):
             agent_index = index_lin%self.num_of_agents
 
             if agent_index == 0:
                 self.timesteps += 1
             
-            curr_state, _, _, _ = self.env.last()
+            curr_state = self.get_full_obs()
             action = self.agents[agent_index].take_step(agent_index, self.nets[agent_index], curr_state, self.epsilons, explore_on=True)
             new_state, reward, is_done, info = self.env.last()
             reward = reward*self.reward_multiplier

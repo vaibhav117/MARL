@@ -7,6 +7,7 @@ import time
 import supersuit as ss
 import matplotlib.pyplot as plt
 import random
+import cv2
 
 env = knights_archers_zombies_v7.env(spawn_rate=20, num_knights=1 , num_archers=1, killable_knights=False, killable_archers=False, line_death=False)
 # env = ss.color_reduction_v0(env, mode='B')
@@ -43,6 +44,7 @@ def random_steps(iterations):
         if(obs1.all() != obs2.all()):
             print("env.last() moves time")
 
+        curr_state = cv2.resize(curr_state, (300,180))
         plt.imshow(curr_state)
         plt.show()
         env.render(mode='human')

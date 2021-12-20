@@ -75,6 +75,7 @@ class Workspace():
             # plt.show()
 
             self.env.render(mode='human')
+            time.sleep(0.1)
 
 if __name__ == '__main__':    
     if constants.run_id == None:
