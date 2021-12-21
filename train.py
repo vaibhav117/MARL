@@ -83,7 +83,7 @@ class Workspace():
         torch.save(model_weights, f"{self.experiment_dir}/latest-model.dat")
 
         if self.best_mean_reward is None or self.best_mean_reward < mean_reward:
-            torch.save(self.nets[agent_index].state_dict(), f"{self.experiment_dir}/best-model.dat")
+            torch.save(model_weights, f"{self.experiment_dir}/best-model.dat")
             self.best_mean_reward = mean_reward
             if self.best_mean_reward is not None:
                 print("Best mean reward updated %.3f" % (self.best_mean_reward))

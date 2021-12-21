@@ -27,7 +27,7 @@ def random_steps(iterations):
         print(done,reward,info)
         if not done:
             if agent == "archer_0":
-                action = random.randint(0,5)
+                action = 5
             else:
                 action = random.randint(0,5)
         else:
