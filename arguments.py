@@ -1,5 +1,9 @@
 import argparse 
 
+"""
+This file has the argument parser to be used while running the code
+"""
+
 def parse_args(s=None):
     if s is None:
         parser= argparse.ArgumentParser(s)
@@ -15,12 +19,12 @@ def parse_args(s=None):
     parser.add_argument('--run_training_flag', default=True, type=bool)
     parser.add_argument('--device', default="cpu", type=str)
 
-    parser.add_argument('--spawn_rate', default=1, type=int)
-    parser.add_argument('--num_knights', default=1, type=int)
-    parser.add_argument('--num_archers', default=0, type=int)
-    parser.add_argument('--killable_knights', default=False, type=bool)
-    parser.add_argument('--killable_archers', default=False, type=bool)
-    parser.add_argument('--line_death', default=False, type=bool)
+    parser.add_argument('--spawn_rate', default=20, type=int)
+    parser.add_argument('--num_knights', default=2, type=int)
+    parser.add_argument('--num_archers', default=2, type=int)
+    parser.add_argument('--killable_knights', default=False, type=bool)         # Turning off Agent Death when they collide with the zombies, agents lose when zombies reach the bottom
+    parser.add_argument('--killable_archers', default=False, type=bool)         # Turning off Agent Death when they collide with the zombies, agents lose when zombies reach the bottom
+    parser.add_argument('--line_death', default=False, type=bool)               # Turning off Agent Death when they hit the edge, agents lose when zombies reach the bottom
 
     parser.add_argument('--total_timesteps', default=1000000000, type=int)
     parser.add_argument('--replay_buffer_size', default=100000, type=int)
@@ -33,7 +37,7 @@ def parse_args(s=None):
     parser.add_argument('--eps_min', default=0.15, type=float)
     parser.add_argument('--sync_target_network_freq', default=1000, type=int)
     parser.add_argument('--network_update_freq', default=10, type=int)
-    parser.add_argument('--reward_multiplier', default=100, type=int)
+    parser.add_argument('--reward_multiplier', default=10, type=int)
 
 
     

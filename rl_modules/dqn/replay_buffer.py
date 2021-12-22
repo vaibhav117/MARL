@@ -1,6 +1,11 @@
 import collections
 import numpy as np
 
+"""
+Replay Buffer class stores the transitions
+for the offline DQN algorithm. 
+"""
+
 class ReplayBuffer:
     def __init__(self, capacity):
         self.buffer = collections.deque(maxlen=capacity)

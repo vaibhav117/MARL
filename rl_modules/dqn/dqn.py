@@ -5,6 +5,11 @@ import torch.optim as optim  # Pytorch optimization package
 
 device = torch.device("cuda")
 
+"""
+This class has the basic DQN declaration
+We use a 3 fairly simple layer conv-net 
+followed by 4 fully connected layers.
+"""
 
 class DQN(nn.Module):
     def __init__(self, input_shape, n_actions):
@@ -18,7 +23,6 @@ class DQN(nn.Module):
             nn.ReLU(),
             nn.Flatten()
         )
-
         conv_out_size = self._get_conv_out(input_shape)
         self.fc = nn.Sequential(
             nn.Linear(conv_out_size, 512),

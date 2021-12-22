@@ -8,10 +8,12 @@ import supersuit as ss
 import matplotlib.pyplot as plt
 import random
 
+"""
+This is just a test script to interact and experiment with the environment
+"""
+
 env = knights_archers_zombies_v7.env(spawn_rate=20, num_knights=2 , num_archers=2, killable_knights=False, killable_archers=False, line_death=False)
-# env = ss.color_reduction_v0(env, mode='B')
 env = ss.resize_v0(env, x_size=84, y_size=84)
-# env = ss.frame_stack_v1(env, 3)
 env.reset()
 
 print(env.action_spaces)
@@ -50,5 +52,3 @@ def random_steps(iterations):
 
 
 random_steps(10000)
-# print(f"Agents: {env.agents}")
-# print(f"Action Space: {env.action_spaces}")

@@ -18,6 +18,10 @@ from rl_modules.dqn.replay_buffer import ReplayBuffer
 
 constants = parse_args()
 
+"""
+This is the main training file. Here
+"""
+
 class Workspace():
     def __init__(self):
         self.run_id = datetime.now().strftime('%d%H-%M%S')
@@ -66,10 +70,6 @@ class Workspace():
         directory = MAKETREEDIR()
         directory.makedir(self.experiment_dir)
 
-    def test(self):
-        print(f"Action Space: {self.action_space}")
-        print(f"Observation Space: {self.observation_space}")
-
     def evaluate(self,agent_index):
         mean_reward = np.mean(self.rewards[-100*self.num_of_agents:])
         wandb.log({"mean_reward":mean_reward})
@@ -82,6 +82,7 @@ class Workspace():
 
         torch.save(model_weights, f"{self.experiment_dir}/latest-model.dat")
 
+        # Updating saved models if the mean_reward is higher than the best
         if self.best_mean_reward is None or self.best_mean_reward < mean_reward:
             torch.save(model_weights, f"{self.experiment_dir}/best-model.dat")
             self.best_mean_reward = mean_reward
@@ -100,23 +101,30 @@ class Workspace():
         done_mask = torch.ByteTensor(dones).to(self.device)
 
         state_action_values = self.nets[agent_index](states_v).gather(1, actions_v.unsqueeze(-1)).squeeze(-1)
+
+        # Getting the Q(s_{t+1}) value using the target network to calculate the Bellman Loss
         next_state_values = self.target_nets[agent_index](next_states_v).max(1)[0]
         next_state_values[done_mask] = 0.0
         next_state_values = next_state_values.detach()
         expected_state_action_values = rewards_v + self.discount*next_state_values
 
+        # We're using SmoothL1Loss instead of MSELoss as it's more stable
         loss_t = self.loss_function(state_action_values, expected_state_action_values)
         wandb.log({f"loss_{agent_index}":loss_t})
         wandb.log({f"epsilon_{agent_index}":self.epsilons[agent_index]})
         wandb.log({f"episode_count":self.episode_count})
 
+        # Calculating gradient and running backpropagation
         self.optimizers[agent_index].zero_grad()
         loss_t.backward()
         self.optimizers[agent_index].step()
 
+        # Updating the Target Network every 100 updates to the main network.
+        # This is required to stabalize learning
         if self.timesteps % self.sync_target_network_freq == 0:
             self.target_nets[agent_index].load_state_dict(self.nets[agent_index].state_dict())
 
+        # Decaying exploration as the models begin to learn
         self.epsilons[agent_index] = max(self.epsilons[agent_index] - self.epsilons[agent_index]*self.eps_decay, self.eps_min)
 
     
@@ -133,19 +141,34 @@ class Workspace():
             self.optimizers.append(optim.Adam(self.nets[index].parameters(), lr=self.lr))
             self.epsilons.append(self.eps_start)
         
+        # Here we iterate over the agents using the agent_iter() function provided by petting zoo
         for index_lin , agent in enumerate(self.env.agent_iter()):
             agent_index = index_lin%self.num_of_agents
 
+            # Timestep is updated only on a new cycle of agent updates
+            # as the environemnt is syncronously moves forward in a time 
+            # frame ony after all agents of decided their steps for the 
+            # current state
             if agent_index == 0:
                 self.timesteps += 1
             
+            # Petting returns agent observations, reward and other info using env.last() function
+            # for the agent currently in play
             curr_state, _, _, _ = self.env.last()
+
+            # Here we call the agent to use the policy and take the step in the environment and return the action
             action = self.agents[agent_index].take_step(agent_index, self.nets[agent_index], curr_state, self.epsilons, explore_on=True)
             new_state, reward, is_done, info = self.env.last()
-            reward = reward*self.reward_multiplier
-            self.episode_reward += reward
-            self.add_to_replay_buffer(agent_index, curr_state, action, reward, is_done, new_state)
 
+            # We are using an reward multiplier of value 10 for every kill to boost learning
+            reward = reward*self.reward_multiplier                  
+            self.episode_reward += reward
+
+            # Adding the transition to the replay buffer
+            self.add_to_replay_buffer(agent_index, curr_state, action, reward, is_done, new_state)
+            
+            # Env reset is done after the final agent has decided it's step
+            # for the current state
             if is_done and agent_index == self.num_of_agents-1 :
                 self.rewards.append(self.episode_reward)
                 self.episode_reward = 0
@@ -153,6 +176,7 @@ class Workspace():
                 self.episode_count += 1
                 self.env.reset()
 
+            # Network updates are called every network_update_freq timesteps
             if (self.replay_buffers[agent_index].__len__() >= self.replay_start_size) and (self.timesteps % self.network_update_freq == 0):
                  self.network_update(agent_index)
 
