@@ -14,9 +14,24 @@ In this project, our aim is to implement a Cooperative MARL model with the goal 
 - test_pettingzoo.py: Uses the optimum model to test on a fresh environment.
 - video.py: Captures the frame, records the progress, saves the video and allows us to watch them play
 
-### Instructions to run
-1. 
+### Setting Up
+1. Create the conda env required for running the project (you might have to change the cudatoolkit version for one which is compatible with your CUDA drivers) -
+```
+conda env create -f conda_env.yml
+```
 
+2. Running the training loop -
+ - For Single Agent -
+```
+python train.py --device cuda --project_name <wand_project_name> --experiment_name <wand_experiment_name> --spawn_rate 20 --num_knights 0 --num_archers 1 --batch_size 512 --lr 0.0001 --network_update_freq 10 --sync_target_network_freq 1000 --eps_decay 0.0001
+```
+
+- For Single Agent -
+```
+python train.py --device cuda --project_name <wand_project_name> --experiment_name <wand_experiment_name> --spawn_rate 20 --num_knights 2 --num_archers 2 --batch_size 128 --lr 0.0001 --network_update_freq 10 --sync_target_network_freq 1000 --eps_decay 0.0001
+```
+
+Adjusting the $$ num_knights $$ and $$ num_archers $$ we can change the env setup
 
 ### Demo
 Single agent
