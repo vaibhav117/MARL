@@ -26,7 +26,7 @@ conda env create -f conda_env.yml
 python train.py --device cuda --project_name <wand_project_name> --experiment_name <wand_experiment_name> --spawn_rate 20 --num_knights 0 --num_archers 1 --batch_size 512 --lr 0.0001 --network_update_freq 10 --sync_target_network_freq 1000 --eps_decay 0.0001
 ```
 
-- For Single Agent -
+- For Multi-Agent -
 ```
 python train.py --device cuda --project_name <wand_project_name> --experiment_name <wand_experiment_name> --spawn_rate 20 --num_knights 2 --num_archers 2 --batch_size 128 --lr 0.0001 --network_update_freq 10 --sync_target_network_freq 1000 --eps_decay 0.0001
 ```
