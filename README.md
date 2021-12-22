@@ -12,7 +12,7 @@ In this project, our aim is to implement a Cooperative MARL model with the goal 
 - replay_buffer.py: Stores the trajectories in the memory
 - train.py: Trains the agents, updates replay buffer, calculates loss and updates the network.
 - test_pettingzoo.py: Uses the optimum model to test on a fresh environment.
-- video.py: Captures the frame, records the progress, saves the video and allows us to watch them play
+- demo.py: Captures the frame, records the progress, saves the video and allows us to watch them play
 
 ### Setting Up
 1. Create the conda env required for running the project (you might have to change the cudatoolkit version for one which is compatible with your CUDA drivers) -
