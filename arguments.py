@@ -31,7 +31,7 @@ def parse_args(s=None):
     parser.add_argument('--replay_start_size', default=10000, type=int)
     parser.add_argument('--discount', default=0.99, type=float)
     parser.add_argument('--lr', default=1e-3, type=float)
-    parser.add_argument('--batch_size', default=256, type=int)
+    parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--eps_start', default=1., type=float)
     parser.add_argument('--eps_decay', default=.0001, type=float)
     parser.add_argument('--eps_min', default=0.15, type=float)
