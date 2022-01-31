@@ -44,4 +44,4 @@ Multiple agents
 
 ---
 ### NYU Deep Learning Final Project
-### Harini Appansrinivasan (ha1642) and Vaibhav Mathur (vm2134)
+### Vaibhav Mathur (vm2134) and Harini Appansrinivasan (ha1642)
